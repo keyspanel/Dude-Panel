@@ -255,6 +255,7 @@ export default function SettingsPage() {
             {siteNameMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Save Site Name
           </Button>
+          </div>
         </div>
       </div>
 
