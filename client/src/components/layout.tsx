@@ -135,7 +135,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <span
                 title={expiryTooltip}
                 data-testid="badge-expiry"
-                className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${
                   expiryCritical
                     ? "bg-red-500/15 text-red-300 border-red-500/30"
                     : expiryWarning
