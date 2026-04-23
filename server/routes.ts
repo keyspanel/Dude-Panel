@@ -134,6 +134,10 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       req.session.destroy(() => {});
       return res.status(401).json({ message: "Session invalid" });
     }
+    if (user.expirationDate && new Date() > user.expirationDate) {
+      req.session.destroy(() => {});
+      return res.status(401).json({ message: "Account expired. Please renew." });
+    }
     const { password, ...safe } = user;
     res.json({ ...safe, levelName: getLevelName(user.level) });
   });
@@ -1254,6 +1258,17 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       return res.status(400).json({ message: "Admin can only create Reseller referral codes." });
     }
 
+    if (!accExpiration || typeof accExpiration !== "string" || !accExpiration.trim()) {
+      return res.status(400).json({ message: "Expiration date is required." });
+    }
+    const expDateCheck = new Date(accExpiration);
+    if (isNaN(expDateCheck.getTime())) {
+      return res.status(400).json({ message: "Invalid expiration date." });
+    }
+    if (expDateCheck.getTime() <= Date.now()) {
+      return res.status(400).json({ message: "Expiration date must be in the future." });
+    }
+
     const code = crypto.randomBytes(6).toString("hex");
     const ref = await storage.createReferral({
       code,
@@ -1261,7 +1276,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       level: refLevel,
       setSaldo: setSaldo || 0,
       createdBy: user.username,
-      accExpiration: accExpiration || undefined,
+      accExpiration,
       maxKeyEdits: maxKeyEdits !== undefined ? Math.max(1, parseInt(maxKeyEdits) || 3) : 3,
       maxDevicesLimit: maxDevicesLimit !== undefined ? Math.max(1, parseInt(maxDevicesLimit) || 1000) : 1000,
       maxKeyExtends: maxKeyExtends !== undefined ? Math.max(1, parseInt(maxKeyExtends) || 5) : 5,

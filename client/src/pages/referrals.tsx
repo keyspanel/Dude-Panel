@@ -135,8 +135,8 @@ export default function ReferralsPage() {
               <Input type="number" min="0" value={createForm.setSaldo} onChange={e => setCreateForm({ ...createForm, setSaldo: e.target.value })} className="h-11 rounded bg-muted/50 border-border/60" data-testid="input-ref-saldo" />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Expiration Date (optional)</Label>
-              <Input type="date" value={createForm.accExpiration} onChange={e => setCreateForm({ ...createForm, accExpiration: e.target.value })} className="h-11 rounded bg-muted/50 border-border/60" data-testid="input-ref-expiration" />
+              <Label className="text-sm font-medium">Expiration Date <span className="text-destructive">*</span></Label>
+              <Input type="date" required min={new Date(Date.now() + 86400000).toISOString().split("T")[0]} value={createForm.accExpiration} onChange={e => setCreateForm({ ...createForm, accExpiration: e.target.value })} className="h-11 rounded bg-muted/50 border-border/60" data-testid="input-ref-expiration" />
             </div>
             <div className="space-y-3 pt-2 border-t border-border/40">
               <p className="text-xs font-medium text-muted-foreground">Key Management Restrictions</p>
