@@ -163,7 +163,29 @@ export default function ProfilePage() {
               placeholder="Enter Telegram Chat ID"
               className="h-11 rounded bg-muted/50 border-border/60"
               data-testid="input-telegram-chatid"
+              minLength={6}
+              maxLength={20}
+              pattern="\d{6,20}"
+              inputMode="numeric"
             />
+            <div className="space-y-1 pt-0.5" data-testid="hint-telegram">
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Format: numbers only, 6–20 digits (e.g. <span className="font-mono">123456789</span>)
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                How to get your Chat ID: open Telegram, search{" "}
+                <a
+                  href="https://t.me/userinfobot"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                  data-testid="link-userinfobot"
+                >
+                  @userinfobot
+                </a>
+                , press <span className="font-medium">Start</span>, and copy the <span className="font-mono">Id</span> it sends back.
+              </p>
+            </div>
           </div>
           <Button
             onClick={() => telegramMutation.mutate(telegramChatId)}
