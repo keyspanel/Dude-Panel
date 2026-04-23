@@ -1396,6 +1396,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       email: user.email,
       status: user.status,
       createdAt: user.createdAt,
+      expirationDate: user.expirationDate,
       sessionExpiresAt: sessionExpiry,
     });
   });

@@ -33,13 +33,41 @@ function useSessionCountdown(expiresAt: number | null) {
   return remaining;
 }
 
-function InfoRow({ label, value, testId }: { label: string; value: string | number; testId: string }) {
+function InfoRow({ label, value, testId }: { label: string; value: React.ReactNode; testId: string }) {
   return (
-    <div className="flex items-center justify-between py-3 px-4 border-b border-border/40 last:border-0" data-testid={testId}>
+    <div className="flex items-center justify-between py-3 px-4 border-b border-border/40 last:border-0 gap-3" data-testid={testId}>
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-semibold text-foreground">{value}</span>
+      <span className="text-sm font-semibold text-foreground text-right">{value}</span>
     </div>
   );
+}
+
+function formatIST(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? "";
+  const dd = get("day").replace(/^0/, "");
+  const mm = get("month").replace(/^0/, "");
+  const yyyy = get("year");
+  const hh = get("hour");
+  const mi = get("minute");
+  return `${dd}/${mm}/${yyyy} ${hh}:${mi} IST`;
+}
+
+function formatExpiryCountdown(date: Date): { label: string; tone: "ok" | "warn" | "crit" | "expired" } {
+  const diffMs = date.getTime() - Date.now();
+  if (diffMs <= 0) return { label: "Expired", tone: "expired" };
+  const days = Math.ceil(diffMs / 86400000);
+  const tone: "ok" | "warn" | "crit" = days <= 1 ? "crit" : days < 7 ? "warn" : "ok";
+  const label = days === 1 ? "1 day left" : `${days} days left`;
+  return { label, tone };
 }
 
 function StatCard({ title, value, icon: Icon, color, testId }: {
@@ -149,10 +177,34 @@ export default function DashboardPage() {
           {stats?.createdAt && (
             <InfoRow
               label="Member Since"
-              value={new Date(stats.createdAt).toLocaleDateString()}
+              value={formatIST(new Date(stats.createdAt))}
               testId="info-member-since"
             />
           )}
+          {stats?.expirationDate && level !== 1 && (() => {
+            const expDate = new Date(stats.expirationDate);
+            const { label, tone } = formatExpiryCountdown(expDate);
+            const toneClass =
+              tone === "crit" || tone === "expired"
+                ? "bg-red-500/15 text-red-500 border-red-500/30"
+                : tone === "warn"
+                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+            return (
+              <InfoRow
+                label="Panel Expires"
+                value={
+                  <span className="inline-flex items-center gap-2 flex-wrap justify-end">
+                    <span className="font-mono">{formatIST(expDate)}</span>
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${toneClass}`} data-testid="badge-expiry-countdown">
+                      {label}
+                    </span>
+                  </span>
+                }
+                testId="info-panel-expires"
+              />
+            );
+          })()}
         </div>
       </div>
 

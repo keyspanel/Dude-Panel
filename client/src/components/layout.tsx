@@ -131,22 +131,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-1.5">
-            {showExpiryBadge && (
-              <span
-                title={expiryTooltip}
-                data-testid="badge-expiry"
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                  expiryCritical
-                    ? "bg-red-500/15 text-red-300 border-red-500/30"
-                    : expiryWarning
-                      ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                      : "bg-panel-header-foreground/10 text-panel-header-foreground/80 border-panel-header-foreground/10"
-                }`}
-              >
-                <Clock className="h-3 w-3" />
-                {expiryLabel}
-              </span>
-            )}
             <span className="text-xs text-panel-header-foreground/50 mr-1 hidden sm:block" data-testid="text-header-saldo">
               <span className="font-medium font-mono text-panel-header-foreground/90">{formatCurrency(user?.saldo ?? 0)}</span>
             </span>
