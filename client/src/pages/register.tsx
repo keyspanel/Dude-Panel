@@ -85,9 +85,31 @@ export default function RegisterPage() {
                   required
                   placeholder={f.placeholder}
                   className="h-11 rounded bg-muted/50 border-border/60"
-                  minLength={f.key === "password" || f.key === "password2" ? 6 : f.key === "username" ? 4 : undefined}
-                  maxLength={f.key === "username" ? 25 : undefined}
+                  minLength={f.key === "password" || f.key === "password2" ? 6 : f.key === "username" ? 4 : f.key === "telegramChatId" ? 6 : undefined}
+                  maxLength={f.key === "username" ? 25 : f.key === "telegramChatId" ? 20 : undefined}
+                  pattern={f.key === "telegramChatId" ? "\\d{6,20}" : undefined}
+                  inputMode={f.key === "telegramChatId" ? "numeric" : undefined}
                 />
+                {f.key === "telegramChatId" && (
+                  <div className="space-y-1 pt-0.5" data-testid="hint-telegram">
+                    <p className="text-[11px] text-muted-foreground leading-snug">
+                      Format: numbers only, 6–20 digits (e.g. <span className="font-mono">123456789</span>)
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-snug">
+                      How to get your Chat ID: open Telegram, search{" "}
+                      <a
+                        href="https://t.me/userinfobot"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                        data-testid="link-userinfobot"
+                      >
+                        @userinfobot
+                      </a>
+                      , press <span className="font-medium">Start</span>, and copy the <span className="font-mono">Id</span> it sends back.
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
             <Button
