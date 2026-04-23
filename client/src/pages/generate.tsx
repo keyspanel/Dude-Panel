@@ -108,7 +108,7 @@ export default function GeneratePage() {
   const devCount = parseInt(maxDevices || "1") || 1;
   const cost = unitPrice * devCount;
 
-  const deviceCap = user?.level === 3 ? 2 : (user?.level === 2 ? Math.min(user?.maxDevicesLimit ?? 1000, 1000) : Infinity);
+  const deviceCap = isOwner ? Infinity : (user?.maxDevicesLimit ?? 1000);
   const devicesExceeded = !isOwner && devCount > deviceCap;
   const balanceInsufficient = !isOwner && cost > (user?.saldo ?? 0);
 
