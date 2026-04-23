@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import {
   LayoutDashboard, Key, Users, Settings,
   LogOut, Menu, Wallet, Link2, User, Gamepad2, Shield,
-  Sun, Moon, Zap, ChevronRight, Globe,
+  Sun, Moon, Zap, ChevronRight, Globe, Clock,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 
@@ -97,6 +97,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const levelLabel = user?.level === 1 ? "Owner" : user?.level === 2 ? "Admin" : "Reseller";
 
+  const expirationDate = user?.expirationDate ? new Date(user.expirationDate) : null;
+  const daysUntilExpiry = expirationDate
+    ? Math.ceil((expirationDate.getTime() - Date.now()) / 86400000)
+    : null;
+  const showExpiryBadge = user?.level !== 1 && daysUntilExpiry !== null;
+  const expiryWarning = daysUntilExpiry !== null && daysUntilExpiry < 7;
+  const expiryCritical = daysUntilExpiry !== null && daysUntilExpiry <= 1;
+  const expiryLabel = daysUntilExpiry === null
+    ? ""
+    : daysUntilExpiry < 0
+      ? "Expired"
+      : daysUntilExpiry === 0
+        ? "Expires today"
+        : daysUntilExpiry === 1
+          ? "1 day left"
+          : `${daysUntilExpiry} days left`;
+  const expiryTooltip = expirationDate
+    ? `Account expires on ${expirationDate.toLocaleDateString()}`
+    : "";
+
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
       <header className="sticky top-0 z-40 bg-panel-header border-b border-white/5">
@@ -111,6 +131,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {showExpiryBadge && (
+              <span
+                title={expiryTooltip}
+                data-testid="badge-expiry"
+                className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                  expiryCritical
+                    ? "bg-red-500/15 text-red-300 border-red-500/30"
+                    : expiryWarning
+                      ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                      : "bg-panel-header-foreground/10 text-panel-header-foreground/80 border-panel-header-foreground/10"
+                }`}
+              >
+                <Clock className="h-3 w-3" />
+                {expiryLabel}
+              </span>
+            )}
             <span className="text-xs text-panel-header-foreground/50 mr-1 hidden sm:block" data-testid="text-header-saldo">
               <span className="font-medium font-mono text-panel-header-foreground/90">{formatCurrency(user?.saldo ?? 0)}</span>
             </span>
