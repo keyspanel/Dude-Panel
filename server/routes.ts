@@ -1328,6 +1328,29 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
     res.json({ siteName: name });
   });
 
+  app.get("/api/settings/site-logo", async (req, res) => {
+    const logo = await storage.getSiteLogo();
+    res.json({ siteLogo: logo });
+  });
+
+  app.patch("/api/settings/site-logo", requireAuth, requireLevel(1), async (req, res) => {
+    const { siteLogo } = req.body;
+    if (siteLogo !== null && (typeof siteLogo !== "string" || siteLogo.length === 0)) {
+      return res.status(400).json({ message: "siteLogo must be a data URL string or null." });
+    }
+    if (typeof siteLogo === "string") {
+      if (!/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml|x-icon|vnd\.microsoft\.icon);base64,/.test(siteLogo)) {
+        return res.status(400).json({ message: "Logo must be an image data URL (PNG, JPEG, GIF, WebP, SVG, or ICO)." });
+      }
+      if (siteLogo.length > 1_500_000) {
+        return res.status(400).json({ message: "Logo image is too large. Please use a file under 1MB." });
+      }
+    }
+    await storage.updateSiteLogo(siteLogo);
+    emitToAll(wsEvent("settings:updated", { section: "site-logo" }));
+    res.json({ message: "Site logo updated." });
+  });
+
   app.patch("/api/settings/site-name", requireAuth, requireLevel(1), async (req, res) => {
     const { siteName } = req.body;
     if (!siteName || typeof siteName !== "string" || siteName.trim().length === 0) {

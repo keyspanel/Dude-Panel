@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -7,15 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Settings, Shield, Type, Wrench, Clock, Globe } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { Loader2, Settings, Shield, Type, Wrench, Clock, Globe, Upload, Trash2 } from "lucide-react";
 
 const featureList = ["ESP", "Item", "AIM", "SilentAim", "BulletTrack", "Floating", "Memory", "Setting"] as const;
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const isOwner = user?.level === 1;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data: siteNameData, isLoading: siteNameLoading } = useQuery<any>({
     queryKey: ["/api/settings/site-name"],
+  });
+
+  const { data: siteLogoData, isLoading: siteLogoLoading } = useQuery<any>({
+    queryKey: ["/api/settings/site-logo"],
   });
 
   const { data: features, isLoading: featuresLoading } = useQuery<any>({
@@ -39,6 +47,7 @@ export default function SettingsPage() {
   });
 
   const [siteNameVal, setSiteNameVal] = useState("");
+  const [siteLogoVal, setSiteLogoVal] = useState<string>("");
   const [featureState, setFeatureState] = useState<Record<string, string>>({});
   const [modname, setModname] = useState("");
   const [ftextStatus, setFtextStatus] = useState("");
@@ -49,6 +58,7 @@ export default function SettingsPage() {
   const [sessionRememberTtl, setSessionRememberTtl] = useState("");
 
   useEffect(() => { if (siteNameData) setSiteNameVal(siteNameData.siteName || ""); }, [siteNameData]);
+  useEffect(() => { if (siteLogoData) setSiteLogoVal(siteLogoData.siteLogo || ""); }, [siteLogoData]);
 
   useEffect(() => {
     if (features) {
@@ -70,6 +80,39 @@ export default function SettingsPage() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/settings/site-name"] }); toast({ title: "Site name updated" }); },
     onError: (e: any) => { toast({ title: "Error", description: e.message, variant: "destructive" }); },
   });
+
+  const siteLogoMutation = useMutation({
+    mutationFn: async (logo: string | null) => { await apiRequest("PATCH", "/api/settings/site-logo", { siteLogo: logo }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/settings/site-logo"] }); toast({ title: "Site logo updated" }); },
+    onError: (e: any) => { toast({ title: "Error", description: e.message, variant: "destructive" }); },
+  });
+
+  const handleLogoFile = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please choose an image file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toast({ title: "File too large", description: "Logo image must be under 1MB.", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setSiteLogoVal(result);
+      siteLogoMutation.mutate(result);
+    };
+    reader.onerror = () => {
+      toast({ title: "Error", description: "Failed to read file.", variant: "destructive" });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleLogoRemove = () => {
+    setSiteLogoVal("");
+    siteLogoMutation.mutate(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const featuresMutation = useMutation({
     mutationFn: async (data: Record<string, string>) => { await apiRequest("PATCH", "/api/settings/features", data); },
@@ -127,17 +170,81 @@ export default function SettingsPage() {
       <div className="rounded-lg border border-border/60 bg-card shadow-sm overflow-hidden">
         <div className="bg-panel-header px-5 py-3 flex items-center gap-2">
           <Globe className="h-4 w-4 text-panel-header-foreground/70" />
-          <h2 className="text-sm font-semibold text-panel-header-foreground">Site Name</h2>
+          <h2 className="text-sm font-semibold text-panel-header-foreground">Site Identity</h2>
         </div>
-        <div className="p-5 space-y-4">
-          <Input
-            value={siteNameVal}
-            onChange={e => setSiteNameVal(e.target.value)}
-            placeholder="Enter site name"
-            maxLength={50}
-            className="h-11 rounded bg-muted/50 border-border/60"
-            data-testid="input-site-name"
-          />
+        <div className="p-5 space-y-5">
+          {isOwner && (
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Site Logo / Favicon</Label>
+              <div className="flex items-center gap-4">
+                <div
+                  className="h-16 w-16 rounded border border-border/60 bg-muted/40 flex items-center justify-center overflow-hidden shrink-0"
+                  data-testid="img-site-logo-preview"
+                >
+                  {siteLogoVal ? (
+                    <img src={siteLogoVal} alt="Site logo" className="h-full w-full object-contain" />
+                  ) : (
+                    <Globe className="h-6 w-6 text-muted-foreground/40" />
+                  )}
+                </div>
+                <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={siteLogoMutation.isPending}
+                    className="h-10 rounded text-sm"
+                    data-testid="button-upload-logo"
+                  >
+                    {siteLogoMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    {siteLogoVal ? "Change Logo" : "Upload Logo"}
+                  </Button>
+                  {siteLogoVal && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleLogoRemove}
+                      disabled={siteLogoMutation.isPending}
+                      className="h-10 rounded text-sm text-destructive hover:text-destructive"
+                      data-testid="button-remove-logo"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon,.ico"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleLogoFile(file);
+                  }}
+                  data-testid="input-logo-file"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Shown above the site name in the header and used as the browser favicon. PNG, JPG, SVG, or ICO. Max 1MB.
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {isOwner && <Label className="text-sm font-medium">Site Name</Label>}
+            <Input
+              value={siteNameVal}
+              onChange={e => setSiteNameVal(e.target.value)}
+              placeholder="Enter site name"
+              maxLength={50}
+              className="h-11 rounded bg-muted/50 border-border/60"
+              data-testid="input-site-name"
+            />
           <p className="text-xs text-muted-foreground">Displayed in the header, login page, and browser tab title.</p>
           <Button
             onClick={() => siteNameMutation.mutate(siteNameVal)}

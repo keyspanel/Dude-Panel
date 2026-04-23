@@ -131,6 +131,7 @@ export const modname = pgTable("modname", {
 export const siteConfig = pgTable("site_config", {
   id: serial("id").primaryKey(),
   siteName: varchar("site_name", { length: 255 }),
+  siteLogo: text("site_logo"),
 });
 
 export const ftext = pgTable("_ftext", {

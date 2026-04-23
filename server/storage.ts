@@ -370,6 +370,20 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getSiteLogo(): Promise<string> {
+    const [row] = await db.select().from(siteConfig);
+    return row?.siteLogo || "";
+  }
+
+  async updateSiteLogo(logo: string | null): Promise<void> {
+    const existing = await db.select().from(siteConfig);
+    if (existing.length === 0) {
+      await db.insert(siteConfig).values({ siteLogo: logo } as any);
+    } else {
+      await db.update(siteConfig).set({ siteLogo: logo } as any).where(eq(siteConfig.id, existing[0].id));
+    }
+  }
+
   async getFtext(): Promise<{ _status: string | null; _ftext: string | null } | undefined> {
     const [f] = await db.select().from(ftext);
     return f;
