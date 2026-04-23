@@ -43,22 +43,23 @@ function InfoRow({ label, value, testId }: { label: string; value: React.ReactNo
 }
 
 function formatIST(date: Date): string {
-  const parts = new Intl.DateTimeFormat("en-GB", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Kolkata",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
+    hour12: true,
   }).formatToParts(date);
   const get = (t: string) => parts.find(p => p.type === t)?.value ?? "";
   const dd = get("day").replace(/^0/, "");
   const mm = get("month").replace(/^0/, "");
   const yyyy = get("year");
-  const hh = get("hour");
+  const hh = get("hour").replace(/^0/, "");
   const mi = get("minute");
-  return `${dd}/${mm}/${yyyy} ${hh}:${mi} IST`;
+  const ap = get("dayPeriod").toUpperCase();
+  return `${dd}/${mm}/${yyyy} ${hh}:${mi} ${ap}`;
 }
 
 function formatExpiryCountdown(date: Date): { label: string; tone: "ok" | "warn" | "crit" | "expired" } {
