@@ -92,8 +92,8 @@ export default function SettingsPage() {
       toast({ title: "Invalid file", description: "Please choose an image file.", variant: "destructive" });
       return;
     }
-    if (file.size > 1024 * 1024) {
-      toast({ title: "File too large", description: "Logo image must be under 1MB.", variant: "destructive" });
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Logo image must be under 5MB.", variant: "destructive" });
       return;
     }
     const reader = new FileReader();
@@ -230,7 +230,7 @@ export default function SettingsPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Shown above the site name in the header and used as the browser favicon. PNG, JPG, SVG, or ICO. Max 1MB.
+                Shown above the site name in the header and used as the browser favicon. PNG, JPG, SVG, or ICO. Max 5MB.
               </p>
             </div>
           )}

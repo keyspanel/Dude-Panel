@@ -1342,8 +1342,8 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       if (!/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml|x-icon|vnd\.microsoft\.icon);base64,/.test(siteLogo)) {
         return res.status(400).json({ message: "Logo must be an image data URL (PNG, JPEG, GIF, WebP, SVG, or ICO)." });
       }
-      if (siteLogo.length > 1_500_000) {
-        return res.status(400).json({ message: "Logo image is too large. Please use a file under 1MB." });
+      if (siteLogo.length > 7_500_000) {
+        return res.status(400).json({ message: "Logo image is too large. Please use a file under 5MB." });
       }
     }
     await storage.updateSiteLogo(siteLogo);
