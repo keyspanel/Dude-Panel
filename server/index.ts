@@ -123,8 +123,11 @@ app.use(
 );
 
 app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+  if (err && err.type === "entity.too.large") {
+    return res.status(413).json({ message: "Request payload is too large." });
+  }
   if (err && (err.type === "entity.parse.failed" || err.status === 400)) {
-    return res.status(400).json({ status: false, reason: "INVALID REQUEST BODY" });
+    return res.status(400).json({ message: "Invalid request body." });
   }
   next(err);
 });

@@ -12,6 +12,7 @@ import {
   getEnvNormalTtl, getEnvRememberMeTtl,
 } from "./auth";
 import { loginSchema, registerSchema, generateKeySchema, insertGameSchema, insertGameDurationSchema } from "@shared/schema";
+import { formatErrorMessage } from "./error-utils";
 import {
   emitScopedKeyEvent, emitScopedUserEvent, emitToAll,
   emitToOwners, emitToAdminsAndAbove, emitToUser,
@@ -212,7 +213,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
         });
       });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Login failed" });
+      res.status(400).json({ message: formatErrorMessage(e, "Login failed") });
     }
   });
 
@@ -315,7 +316,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
         });
       });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Registration failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Registration failed.") });
     }
   });
 
@@ -348,7 +349,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       if (process.env.NODE_ENV !== "production") response.otp_hint = otp;
       res.json(response);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Request failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Request failed.") });
     }
   });
 
@@ -399,7 +400,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json({ message: "Password reset successfully. You can now login with your new password." });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Reset failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Reset failed.") });
     }
   });
 
@@ -450,7 +451,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json({ message: "Device reset successfully. You can login again." });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Device reset failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Device reset failed.") });
     }
   });
 
@@ -606,7 +607,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json({ key: newKey, cost: isOwner ? 0 : cost, balanceAfter: newBalance });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Key generation failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Key generation failed.") });
     }
   });
 
@@ -655,7 +656,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json({ success: true, logged: verifiedKeys.length });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Log failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Log failed.") });
     }
   });
 
@@ -761,7 +762,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json(updated);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Update failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Update failed.") });
     }
   });
 
@@ -871,7 +872,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
         remaining: remaining,
       });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Extend failed." });
+      res.status(400).json({ message: formatErrorMessage(e, "Extend failed.") });
     }
   });
 
@@ -1473,7 +1474,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json(game);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to create game" });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to create game") });
     }
   });
 
@@ -1510,7 +1511,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json(updated);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to update game" });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to update game") });
     }
   });
 
@@ -1536,7 +1537,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json({ message: "Game deleted" });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to delete game" });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to delete game") });
     }
   });
 
@@ -1572,7 +1573,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json(dur);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to create duration" });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to create duration") });
     }
   });
 
@@ -1595,7 +1596,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json(updated);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to update duration" });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to update duration") });
     }
   });
 
@@ -1612,7 +1613,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
 
       res.json({ message: "Duration deleted" });
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to delete duration" });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to delete duration") });
     }
   });
 
@@ -1980,7 +1981,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       const cfg = await storage.upsertApiGeneratorConfig(updates);
       res.json(cfg);
     } catch (e: any) {
-      res.status(400).json({ message: e.message || "Failed to update config." });
+      res.status(400).json({ message: formatErrorMessage(e, "Failed to update config.") });
     }
   });
 
@@ -2282,7 +2283,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       res.json({ message: "Owner account created successfully. You can now log in." });
     } catch (err: any) {
       console.error("[setup] Error creating owner:", err);
-      res.status(500).json({ message: err.message || "Failed to create owner" });
+      res.status(500).json({ message: formatErrorMessage(err, "Failed to create owner") });
     }
   });
 
