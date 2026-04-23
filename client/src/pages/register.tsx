@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const { siteName } = useSiteName();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    username: "", fullname: "",
+    username: "", fullname: "", telegramChatId: "",
     password: "", password2: "", referral: "",
   });
 
@@ -46,6 +46,7 @@ export default function RegisterPage() {
   const fields = [
     { key: "username", label: "Username", type: "text", placeholder: "Choose a username" },
     { key: "fullname", label: "Full Name", type: "text", placeholder: "Your full name" },
+    { key: "telegramChatId", label: "Telegram Chat ID", type: "text", placeholder: "Your Telegram Chat ID" },
     { key: "password", label: "Password", type: "password", placeholder: "Min 6 characters" },
     { key: "password2", label: "Confirm Password", type: "password", placeholder: "Confirm password" },
     { key: "referral", label: "Referral Code", type: "text", placeholder: "Enter referral code" },

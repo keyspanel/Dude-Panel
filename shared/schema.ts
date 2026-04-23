@@ -274,7 +274,7 @@ export const registerSchema = z.object({
   email: z.string().email().min(13).max(40).optional(),
   username: z.string().min(4).max(25).regex(/^[a-zA-Z0-9]+$/),
   fullname: z.string().min(4).max(100),
-  telegramChatId: z.string().min(6).max(20).regex(/^\d+$/).optional(),
+  telegramChatId: z.string().min(6).max(20).regex(/^\d+$/),
   password: z.string().min(6).max(45),
   password2: z.string().min(6).max(45),
   referral: z.string().min(6),
