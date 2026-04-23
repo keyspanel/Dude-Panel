@@ -204,6 +204,16 @@ export default function GeneratePage() {
     });
   };
 
+  const handleCopyKeyOnly = () => {
+    if (!generatedKey) return;
+    navigator.clipboard.writeText(generatedKey.userKey);
+    toast({ title: "Key copied to clipboard" });
+    logActionMutation.mutate({
+      action: "Key Copied",
+      keyIds: [generatedKey.id],
+    });
+  };
+
   const handleDownload = () => {
     if (!generatedKey || !genMeta) return;
     const content = [
@@ -499,25 +509,37 @@ export default function GeneratePage() {
                 </p>
               </div>
 
-              <div className="px-5 pb-4 flex gap-2">
+              <div className="px-5 pb-4 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCopy}
+                    size="sm"
+                    className="flex-1 h-9 text-xs font-medium gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white transition-all"
+                    data-testid="button-copy-key"
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? "Copied!" : "Copy Details"}
+                  </Button>
+                  <Button
+                    onClick={handleDownload}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 h-9 text-xs font-medium gap-1.5 border-border/60 hover:bg-muted/80 transition-all"
+                    data-testid="button-download-key"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download
+                  </Button>
+                </div>
                 <Button
-                  onClick={handleCopy}
-                  size="sm"
-                  className="flex-1 h-9 text-xs font-medium gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white transition-all"
-                  data-testid="button-copy-key"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copied!" : "Copy Details"}
-                </Button>
-                <Button
-                  onClick={handleDownload}
+                  onClick={handleCopyKeyOnly}
                   variant="outline"
                   size="sm"
-                  className="flex-1 h-9 text-xs font-medium gap-1.5 border-border/60 hover:bg-muted/80 transition-all"
-                  data-testid="button-download-key"
+                  className="h-9 text-xs font-medium gap-1.5 border-border/60 hover:bg-muted/80 transition-all"
+                  data-testid="button-copy-key-only"
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  Download
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy Key Only
                 </Button>
               </div>
             </div>
