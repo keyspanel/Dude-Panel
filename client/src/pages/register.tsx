@@ -8,12 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus, Sun, Moon } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useSiteName } from "@/hooks/use-site-name";
+import { useSiteLogo } from "@/hooks/use-site-logo";
 
 export default function RegisterPage() {
   const [, setLocation] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const { siteName } = useSiteName();
+  const { siteLogo } = useSiteLogo();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     username: "", fullname: "", telegramChatId: "",
@@ -70,8 +72,12 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="mx-auto w-14 h-14 rounded-lg bg-panel-header flex items-center justify-center mb-4">
-            <UserPlus className="w-6 h-6 text-panel-header-foreground" />
+          <div className="mx-auto w-14 h-14 rounded-lg bg-panel-header flex items-center justify-center mb-4 overflow-hidden">
+            {siteLogo ? (
+              <img src={siteLogo} alt="Logo" className="w-full h-full object-contain" data-testid="img-auth-logo" />
+            ) : (
+              <UserPlus className="w-6 h-6 text-panel-header-foreground" />
+            )}
           </div>
           <h1 className="text-2xl font-bold tracking-tight" data-testid="text-register-title">Create Account</h1>
           <p className="text-sm text-muted-foreground mt-1.5">Register for {siteName} access</p>

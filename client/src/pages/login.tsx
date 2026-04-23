@@ -10,11 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock, User, Eye, EyeOff, Sun, Moon } from "lucide-react";
 import { useSiteName } from "@/hooks/use-site-name";
+import { useSiteLogo } from "@/hooks/use-site-logo";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { login } = useAuth();
   const { siteName } = useSiteName();
+  const { siteLogo } = useSiteLogo();
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -79,8 +81,12 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="mx-auto w-14 h-14 rounded-lg bg-panel-header flex items-center justify-center mb-4">
-            <Lock className="w-6 h-6 text-panel-header-foreground" />
+          <div className="mx-auto w-14 h-14 rounded-lg bg-panel-header flex items-center justify-center mb-4 overflow-hidden">
+            {siteLogo ? (
+              <img src={siteLogo} alt="Logo" className="w-full h-full object-contain" data-testid="img-auth-logo" />
+            ) : (
+              <Lock className="w-6 h-6 text-panel-header-foreground" />
+            )}
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground" data-testid="text-page-title">
             {show2FA ? "Verify OTP" : siteName}
