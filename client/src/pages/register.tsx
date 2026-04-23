@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus, Sun, Moon } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useSiteName } from "@/hooks/use-site-name";
 
 export default function RegisterPage() {
@@ -35,7 +35,12 @@ export default function RegisterPage() {
       const res = await apiRequest("POST", "/api/auth/register", form);
       const data = await res.json();
       toast({ title: "Success", description: data.message });
-      setLocation("/login");
+      if (data.autoLogin) {
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        setLocation("/");
+      } else {
+        setLocation("/login");
+      }
     } catch (e: any) {
       toast({ title: "Registration Failed", description: e.message, variant: "destructive" });
     } finally {

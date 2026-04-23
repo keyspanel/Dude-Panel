@@ -281,7 +281,7 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
         level: refCode.level || 3,
         uplink: refCode.createdBy || undefined,
         userIp: ip,
-        status: 0,
+        status: 1,
         expirationDate: expDate,
         maxKeyEdits: refCode.maxKeyEdits ?? 3,
         maxDevicesLimit: refCode.maxDevicesLimit ?? 1000,
@@ -294,7 +294,22 @@ export async function registerRoutes(httpServer: Server | null, app: Express): P
       emitScopedUserEvent(wsEvent("users:created"), refCode.createdBy || undefined);
       emitScopedUserEvent(wsEvent("referrals:used"), refCode.createdBy || undefined);
 
-      res.json({ message: "Registration submitted. Wait for approval." });
+      const ttlMs = await resolveSessionTtlMs(false);
+      req.session.regenerate((err) => {
+        if (err) return res.status(500).json({ message: "Session error." });
+        req.session.userId = newUser.id;
+        req.session.username = newUser.username;
+        req.session.userLevel = newUser.level;
+        req.session.cookie.maxAge = ttlMs;
+        req.session.save(() => {
+          const { password: _pw, ...safe } = newUser;
+          res.json({
+            message: "Registration successful. You are now logged in.",
+            user: { ...safe, levelName: getLevelName(newUser.level) },
+            autoLogin: true,
+          });
+        });
+      });
     } catch (e: any) {
       res.status(400).json({ message: e.message || "Registration failed." });
     }
